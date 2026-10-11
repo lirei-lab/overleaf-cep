@@ -5,6 +5,11 @@
 #   tag  `v*` (e.g. v6.3.0-ext-v5.1-lirei.1) -> :<tag>, :sha-<short>
 #
 # Deploy immutable tags only (:<tag> or :sha-<short>); :lirei moves.
+#
+# Runs on the lirei-lab scale set `sti-k8s` (UQTR STI cluster). Those runner
+# pods have no Docker daemon, so the build itself happens in the shared rootless
+# BuildKit daemon of that cluster (cluster-sti/buildkit), which also keeps the
+# layer cache between builds.
 name: build-image
 
 on:
@@ -27,17 +32,9 @@ env:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: sti-k8s
     timeout-minutes: 120
     steps:
-      # The base image installs TeX Live and the final image runs webpack:
-      # the runner's default ~14 GB free is not enough.
-      - name: Free disk space
-        run: |
-          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /opt/hostedtoolcache/CodeQL
-          docker image prune --all --force
-          df -h /
-
       - uses: actions/checkout@v4
 
       # The Makefile copies this into the build context root before each build.
@@ -45,12 +42,20 @@ jobs:
         run: cp server-ce/.dockerignore .dockerignore
 
       - uses: docker/setup-buildx-action@v3
-
-      - uses: docker/login-action@v3
         with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+          driver: remote
+          endpoint: tcp://buildkitd.buildkit.svc.cluster.local:1234
+
+      # docker/login-action needs a Docker daemon; buildx only needs the
+      # credentials file, which it forwards to the remote builder.
+      - name: GHCR credentials
+        env:
+          TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          mkdir -p ~/.docker
+          auth=$(printf '%s:%s' "${{ github.actor }}" "$TOKEN" | base64 -w0)
+          printf '{"auths":{"ghcr.io":{"auth":"%s"}}}' "$auth" > ~/.docker/config.json
+          chmod 600 ~/.docker/config.json
 
       - id: short
         run: echo "sha=sha-${GITHUB_SHA::7}" >> "$GITHUB_OUTPUT"
@@ -65,8 +70,6 @@ jobs:
           tags: |
             ${{ env.BASE_IMAGE }}:${{ steps.short.outputs.sha }}
             ${{ env.BASE_IMAGE }}:lirei
-          cache-from: type=gha,scope=base
-          cache-to: type=gha,scope=base,mode=max
 
       - id: meta
         uses: docker/metadata-action@v5
@@ -89,5 +92,3 @@ jobs:
             OVERLEAF_BASE_TAG=${{ env.BASE_IMAGE }}:${{ steps.short.outputs.sha }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-          cache-from: type=gha,scope=community
-          cache-to: type=gha,scope=community,mode=max
