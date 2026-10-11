@@ -17,6 +17,14 @@
   Figure 1: A screenshot of a project being edited in Overleaf CE+
 </p>
 
+> [!NOTE]
+> **LIREI fork.** This is [yu-i-i/overleaf-cep](https://github.com/yu-i-i/overleaf-cep) (Overleaf Extended CE) as deployed by the
+> LIREI lab at UQTR, with OpenID Connect login. The `lirei` branch adds only:
+> - `.github/workflows/build-image.yml`: builds the image and publishes it to `ghcr.io/lirei-lab/overleaf-cep`
+> - `helm/overleaf`: Helm chart for Kubernetes (TeX Live on a shared PVC, MongoDB replica set, Redis)
+>
+> Everything else tracks upstream `ext-ce`. Deployment values with real secrets are kept outside this repository.
+
 ## Community Edition
 
 [Overleaf](https://www.overleaf.com) is an open-source online real-time collaborative LaTeX editor. Overleaf runs a hosted version at [www.overleaf.com](https://www.overleaf.com), but you can also run your own local version, and contribute to the development of Overleaf.

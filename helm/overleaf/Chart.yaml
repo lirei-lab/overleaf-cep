@@ -1,0 +1,16 @@
+apiVersion: v2
+name: overleaf
+description: A Helm chart for Overleaf CE (ShareLaTeX) with OIDC support
+type: application
+version: 0.2.0
+appVersion: "v6.3.0-ext-v5.1-lirei.1"
+
+dependencies:
+  - name: mongodb
+    version: 18.6.20 # Recent stable version
+    repository: https://charts.bitnami.com/bitnami
+    condition: mongodb.enabled
+  - name: redis
+    version: 25.3.9 # Recent stable version
+    repository: https://charts.bitnami.com/bitnami
+    condition: redis.enabled

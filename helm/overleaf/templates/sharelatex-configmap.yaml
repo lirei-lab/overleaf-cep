@@ -1,0 +1,90 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "overleaf.fullname" . }}-config
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "overleaf.labels" . | nindent 4 }}
+data:
+  # ----------------------------------------------------------------------------
+  # Core Services
+  # ----------------------------------------------------------------------------
+  OVERLEAF_MONGO_URL: {{ include "overleaf.mongodb.uri" . | quote }}
+  REDIS_HOST: {{ include "overleaf.redis.host" . | quote }}
+  OVERLEAF_REDIS_HOST: {{ include "overleaf.redis.host" . | quote }}
+  REDIS_PORT: "6379"
+  OVERLEAF_REDIS_PORT: "6379"
+
+  # ----------------------------------------------------------------------------
+  # App Configuration
+  # ----------------------------------------------------------------------------
+  OVERLEAF_APP_NAME: "Overleaf Community Edition"
+  OVERLEAF_ENV: "production"
+
+  # Site URL — must match the redirect URI registered in GitLab OAuth app
+  OVERLEAF_SITE_URL: {{ .Values.overleaf.url | quote }}
+  # Fix CSRF failure on login: Behind a reverse proxy, set trust proxy.
+  # If local, keeping default.
+  OVERLEAF_TRUST_PROXY: "1"
+
+  # Listen address
+  OVERLEAF_LISTEN_IP: {{ .Values.overleaf.listenIp | quote }}
+  
+  # Set telemetry to CE version
+  OVERLEAF_CE_TELEMETRY: "true"
+
+  # ----------------------------------------------------------------------------
+  # Core App Settings (Branding)
+  # ----------------------------------------------------------------------------
+  OVERLEAF_ADMIN_EMAIL: {{ .Values.overleaf.adminEmail | quote }}
+  {{- if eq .Values.overleaf.signupDisabled "true" }}
+  OVERLEAF_ALLOW_PUBLIC_ACCESS: "false"
+  {{- else if eq .Values.overleaf.signupDisabled "false" }}
+  OVERLEAF_ALLOW_PUBLIC_ACCESS: "true"
+  {{- end }}
+  OVERLEAF_NAV_TITLE: {{ .Values.overleaf.navTitle | quote }}
+  {{- if .Values.overleaf.headerImageUrl }}
+  OVERLEAF_HEADER_IMAGE_URL: {{ .Values.overleaf.headerImageUrl | quote }}
+  {{- end }}
+
+  # ----------------------------------------------------------------------------
+  # Authentication (OIDC)
+  # ----------------------------------------------------------------------------
+  # Enables the "Log in with GitLab" button
+  EXTERNAL_AUTH: "oidc"
+
+  OVERLEAF_OIDC_ISSUER: {{ .Values.overleaf.oidc.issuer | quote }}
+  OVERLEAF_OIDC_AUTHORIZATION_URL: {{ .Values.overleaf.oidc.authorizationUrl | quote }}
+  OVERLEAF_OIDC_TOKEN_URL: {{ .Values.overleaf.oidc.tokenUrl | quote }}
+  OVERLEAF_OIDC_USER_INFO_URL: {{ .Values.overleaf.oidc.userInfoUrl | quote }}
+  OVERLEAF_OIDC_SCOPE: {{ .Values.overleaf.oidc.scope | quote }}
+  OVERLEAF_OIDC_PROVIDER_ID: {{ .Values.overleaf.oidc.providerId | quote }}
+  OVERLEAF_OIDC_PROVIDER_NAME: {{ .Values.overleaf.oidc.providerName | quote }}
+  OVERLEAF_OIDC_PROVIDER_DESCRIPTION: {{ .Values.overleaf.oidc.providerDescription | quote }}
+  OVERLEAF_OIDC_PROVIDER_INFO_LINK: {{ .Values.overleaf.oidc.providerInfoLink | quote }}
+  OVERLEAF_OIDC_PROVIDER_HIDE_NOT_LINKED: {{ .Values.overleaf.oidc.providerHideNotLinked | quote }}
+  OVERLEAF_OIDC_USER_ID_FIELD: {{ .Values.overleaf.oidc.userIdField | quote }}
+  OVERLEAF_OIDC_IS_ADMIN_FIELD: {{ .Values.overleaf.oidc.isAdminField | quote }}
+  OVERLEAF_OIDC_IS_ADMIN_FIELD_VALUE: {{ .Values.overleaf.oidc.isAdminFieldValue | quote }}
+  OVERLEAF_OIDC_UPDATE_USER_DETAILS_ON_LOGIN: {{ .Values.overleaf.oidc.updateUserDetailsOnLogin | quote }}
+  OVERLEAF_OIDC_ALLOWED_EMAIL_DOMAINS: {{ .Values.overleaf.oidc.allowedEmailDomains | quote }}
+
+  # ----------------------------------------------------------------------------
+  # Email (SMTP) & UI Customization
+  # ----------------------------------------------------------------------------
+  {{- if .Values.overleaf.email.enabled }}
+  OVERLEAF_EMAIL_HOST: {{ .Values.overleaf.email.host | quote }}
+  OVERLEAF_EMAIL_PORT: {{ .Values.overleaf.email.port | quote }}
+  OVERLEAF_EMAIL_AUTH_USER: {{ .Values.overleaf.email.user | quote }}
+  OVERLEAF_EMAIL_AUTH_PASS: {{ .Values.overleaf.email.pass | quote }}
+  OVERLEAF_EMAIL_FROM_ADDRESS: {{ .Values.overleaf.email.fromAddress | quote }}
+  OVERLEAF_EMAIL_REPLY_TO_ADDRESS: {{ .Values.overleaf.email.replyToAddress | quote }}
+  OVERLEAF_CUSTOM_EMAIL_FOOTER: {{ .Values.overleaf.email.customFooter | quote }}
+  {{- end }}
+
+  {{- if .Values.overleaf.footer.left }}
+  OVERLEAF_LEFT_FOOTER: {{ .Values.overleaf.footer.left | quote }}
+  {{- end }}
+  {{- if .Values.overleaf.footer.right }}
+  OVERLEAF_RIGHT_FOOTER: {{ .Values.overleaf.footer.right | quote }}
+  {{- end }}

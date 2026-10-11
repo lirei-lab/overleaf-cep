@@ -1,0 +1,15 @@
+{{- if .Values.persistence.enabled }}
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: {{ include "overleaf.fullname" . }}-texlive
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "overleaf.labels" . | nindent 4 }}
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 20Gi
+{{- end }}

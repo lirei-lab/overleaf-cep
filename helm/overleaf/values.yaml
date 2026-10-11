@@ -1,0 +1,132 @@
+# Default values for overleaf.
+# This is a YAML-formatted file.
+
+replicaCount: 1
+
+image:
+  # Built by .github/workflows/build-image.yml
+  repository: ghcr.io/lirei-lab/overleaf-cep
+  pullPolicy: IfNotPresent
+  # Overrides the image tag whose default is the chart appVersion.
+  # Pin an immutable tag (vX-lirei.N or sha-xxxxxxx), never a moving one.
+  tag: ""
+
+nameOverride: ""
+fullnameOverride: ""
+
+service:
+  type: ClusterIP
+  port: 80
+
+ingress:
+  enabled: true
+  className: "nginx"
+  annotations:
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+    nginx.ingress.kubernetes.io/affinity: "cookie"
+    nginx.ingress.kubernetes.io/session-cookie-name: "overleaf-session"
+    nginx.ingress.kubernetes.io/session-cookie-expires: "172800"
+    nginx.ingress.kubernetes.io/session-cookie-max-age: "172800"
+    nginx.ingress.kubernetes.io/proxy-body-size: "1000m"
+    nginx.ingress.kubernetes.io/client-body-buffer-size: "1000m"
+  hosts:
+    - host: overleaf.cloud.lirei.io
+      paths:
+        - path: /
+          pathType: ImplementationSpecific
+  tls:
+   - secretName: overleaf-tls
+     hosts:
+       - overleaf.cloud.lirei.io
+
+persistence:
+  enabled: true
+  storageClass: ""
+  accessMode: ReadWriteOnce
+  size: 10Gi
+
+resources:
+  requests:
+    cpu: 500m
+    memory: 1Gi
+  limits:
+    cpu: 2
+    memory: 4Gi
+
+overleaf:
+  url: "https://overleaf.cloud.lirei.io"
+  listenIp: "0.0.0.0"
+  
+  # Base UI Settings
+  adminEmail: "placeholder@example.com"
+  signupDisabled: "false"
+  navTitle: "Overleaf Community Edition"
+  headerImageUrl: ""
+
+  # Ensure these are provided during helm install or via a local values file
+  oidc:
+    enabled: true
+    issuer: ""
+    authorizationUrl: ""
+    tokenUrl: ""
+    userInfoUrl: ""
+    callbackUrl: ""
+    scope: ""
+    clientId: ""
+    clientSecret: ""
+    enableLocalLogin: "true"
+    providerId: "oidc"
+    providerName: "SSO"
+    providerDescription: ""
+    providerInfoLink: ""
+    providerHideNotLinked: "false"
+    userIdField: "sub"
+    isAdminField: ""
+    isAdminFieldValue: ""
+    updateUserDetailsOnLogin: "true"
+    allowedEmailDomains: ""
+
+  # Ensure these are provided during helm install or via a local values file
+  email:
+    enabled: false
+    host: ""
+    port: "587"
+    user: ""
+    pass: ""
+    fromAddress: "noreply@lirei.io"
+    replyToAddress: "support@lirei.io"
+    customFooter: "Overleaf CE - Hosted by Lirei Open"
+
+  # JSON strings for Overleaf UI footer layout
+  footer:
+    left: ""
+    right: ""
+
+# ------------------------------------------------------------------------------
+# bitnami/mongodb Dependency Configuration
+# Required by Overleaf: Replica Set mode (architecture: replicaset)
+# ------------------------------------------------------------------------------
+mongodb:
+  enabled: true
+  architecture: replicaset
+  replicaCount: 3
+  
+  # Authentication is disabled to match previous standard k8s manifests.
+  # For production, enable this and configure overleaf to use the credentials.
+  auth:
+    enabled: false
+  
+  replicaSetName: "overleaf"
+
+# ------------------------------------------------------------------------------
+# bitnami/redis Dependency Configuration
+# ------------------------------------------------------------------------------
+redis:
+  enabled: true
+  
+  # Overleaf CE connects to a single REDIS_HOST/REDIS_PORT. 
+  architecture: standalone
+  
+  # Authentication is disabled to match previous standard k8s manifests.
+  auth:
+    enabled: false
