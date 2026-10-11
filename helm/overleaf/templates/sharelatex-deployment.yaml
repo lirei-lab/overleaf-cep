@@ -103,6 +103,12 @@ spec:
                 name: {{ include "overleaf.fullname" . }}-config
             - secretRef:
                 name: {{ include "overleaf.fullname" . }}-oidc
+            {{- with .Values.overleaf.appSecretsName }}
+            # Stable app secrets (OVERLEAF_INVITE_TOKEN_SECRET, required since
+            # v6.3), created once outside Helm so an upgrade can never rotate them.
+            - secretRef:
+                name: {{ . }}
+            {{- end }}
           volumeMounts:
             {{- if .Values.persistence.enabled }}
             - name: data

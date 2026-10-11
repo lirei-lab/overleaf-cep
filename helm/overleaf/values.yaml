@@ -54,6 +54,10 @@ resources:
     memory: 4Gi
 
 overleaf:
+  # Existing Secret with OVERLEAF_INVITE_TOKEN_SECRET (required since v6.3):
+  #   kubectl -n overleaf create secret generic overleaf-app-secrets \
+  #     --from-literal=OVERLEAF_INVITE_TOKEN_SECRET="$(openssl rand -base64 32)"
+  appSecretsName: overleaf-app-secrets
   url: "https://overleaf.cloud.lirei.io"
   listenIp: "0.0.0.0"
   
