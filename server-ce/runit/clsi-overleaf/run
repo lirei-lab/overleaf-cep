@@ -18,4 +18,15 @@ fi
 source /etc/overleaf/env.sh
 export LISTEN_ADDRESS=127.0.0.1
 
+# LIREI hardening (no sandboxed compiles on Kubernetes): every compile inherits
+# CLSI's environment, so user LaTeX could read these with Lua's os.getenv().
+# CLSI itself uses none of them.
+unset OT_JWT_AUTH_KEY OVERLEAF_EMAIL_AUTH_PASS OVERLEAF_INVITE_TOKEN_SECRET \
+  OVERLEAF_OIDC_CLIENT_SECRET STAGING_PASSWORD V1_HISTORY_PASSWORD WEB_API_PASSWORD
+# kpathsea "paranoid": \input and friends may not open absolute paths, parent
+# directories or dot files, so a project cannot read other projects' compile
+# dirs, /proc/*/environ or the config. Side effect: lualatex fails (luaotfload
+# reads its cache by absolute path); pdflatex and xelatex are unaffected.
+export openin_any=p
+
 exec /sbin/setuser www-data /usr/bin/node $NODE_PARAMS /overleaf/services/clsi/app.js >> /var/log/overleaf/clsi.log 2>&1

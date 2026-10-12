@@ -2,8 +2,8 @@ apiVersion: v2
 name: overleaf
 description: A Helm chart for Overleaf CE (ShareLaTeX) with OIDC support
 type: application
-version: 0.2.0
-appVersion: "v6.3.0-ext-v5.1-lirei.1"
+version: 0.3.0
+appVersion: "v6.3.0-ext-v5.1-lirei.2"
 
 dependencies:
   - name: mongodb

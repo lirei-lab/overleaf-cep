@@ -124,6 +124,19 @@ mongodb:
   
   replicaSetName: "overleaf"
 
+  # Bitnami no longer publishes versioned free images and `latest` moves: a pod
+  # rescheduled onto another node could pull a different major over the same
+  # data. Pinned to the digest that has been running (MongoDB 8.2.6).
+  image:
+    tag: latest
+    digest: "sha256:3cb21cf1de351e133da3bdf574fc61da9dc371a05d13aff91ed15a9b50becb8a"
+
+  # The "small" preset (768Mi) OOM-killed members under normal load.
+  resourcesPreset: none
+  resources:
+    requests: { cpu: 500m, memory: 1Gi }
+    limits: { cpu: "2", memory: 2Gi }
+
 # ------------------------------------------------------------------------------
 # bitnami/redis Dependency Configuration
 # ------------------------------------------------------------------------------
@@ -132,6 +145,11 @@ redis:
   
   # Overleaf CE connects to a single REDIS_HOST/REDIS_PORT. 
   architecture: standalone
+
+  # Pinned for the same reason as MongoDB (Redis 8.6.2).
+  image:
+    tag: latest
+    digest: "sha256:98cf67395e80506c7bc21b889107980365558ef30d59059ac6d76aab2678bf7e"
   
   # Authentication is disabled to match previous standard k8s manifests.
   auth:

@@ -21,12 +21,14 @@ spec:
       labels:
         {{- include "overleaf.selectorLabels" . | nindent 8 }}
     spec:
+      # Nothing in Overleaf talks to the Kubernetes API; do not hand compiles a token.
+      automountServiceAccountToken: false
       terminationGracePeriodSeconds: 60
       enableServiceLinks: false
 
       initContainers:
         - name: wait-for-mongo
-          image: busybox:latest
+          image: busybox:1.37.0
           command:
             - sh
             - -c
@@ -36,7 +38,7 @@ spec:
               done
               echo "MongoDB is ready!"
         - name: texlive-provisioner
-          image: debian:bookworm-slim
+          image: debian:bookworm-20251229-slim
           command:
             - "bash"
             - "-c"
