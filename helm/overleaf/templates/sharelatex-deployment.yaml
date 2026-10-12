@@ -14,6 +14,10 @@ spec:
       {{- include "overleaf.selectorLabels" . | nindent 6 }}
   template:
     metadata:
+      # Restart the pod when its env changes (envFrom is only read at start).
+      annotations:
+        checksum/config: {{ include (print $.Template.BasePath "/sharelatex-configmap.yaml") . | sha256sum }}
+        checksum/secret: {{ include (print $.Template.BasePath "/sharelatex-secret.yaml") . | sha256sum }}
       labels:
         {{- include "overleaf.selectorLabels" . | nindent 8 }}
     spec:

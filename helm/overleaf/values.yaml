@@ -74,6 +74,8 @@ overleaf:
     authorizationUrl: ""
     tokenUrl: ""
     userInfoUrl: ""
+    # IdP end-session endpoint; empty = Overleaf logout only.
+    logoutUrl: ""
     callbackUrl: ""
     scope: ""
     clientId: ""

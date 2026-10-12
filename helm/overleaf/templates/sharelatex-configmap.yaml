@@ -58,6 +58,10 @@ data:
   OVERLEAF_OIDC_TOKEN_URL: {{ .Values.overleaf.oidc.tokenUrl | quote }}
   OVERLEAF_OIDC_USER_INFO_URL: {{ .Values.overleaf.oidc.userInfoUrl | quote }}
   OVERLEAF_OIDC_SCOPE: {{ .Values.overleaf.oidc.scope | quote }}
+  {{- with .Values.overleaf.oidc.logoutUrl }}
+  # RP-initiated logout: Overleaf's "Log out" also ends the IdP session.
+  OVERLEAF_OIDC_LOGOUT_URL: {{ . | quote }}
+  {{- end }}
   OVERLEAF_OIDC_PROVIDER_ID: {{ .Values.overleaf.oidc.providerId | quote }}
   OVERLEAF_OIDC_PROVIDER_NAME: {{ .Values.overleaf.oidc.providerName | quote }}
   OVERLEAF_OIDC_PROVIDER_DESCRIPTION: {{ .Values.overleaf.oidc.providerDescription | quote }}
