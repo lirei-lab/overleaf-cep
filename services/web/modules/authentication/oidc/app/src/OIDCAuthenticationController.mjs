@@ -28,6 +28,7 @@ const OIDCAuthenticationController = {
           return res.redirect(`${logoutUrl}?id_token_hint=${info.idToken}&post_logout_redirect_uri=${encodeURIComponent(redirectUri)}`)
 	}
         if (user) {
+          delete req.session.oidcStateRetry
           req.session.idToken = info.idToken
           user.externalAuth = 'oidc'
           // `user` is either a user object or false
@@ -40,6 +41,14 @@ const OIDCAuthenticationController = {
             return next(err)
           }
         } else {
+// A callback whose state does not match this session (old e-mail login link, a
+// second login tab, another browser) is harmless: restart the login once. The
+// IdP session usually exists by now, so the retry completes without a prompt.
+          if (/authorization request state/i.test(info?.message || '') && !req.session.oidcStateRetry) {
+            req.session.oidcStateRetry = true
+            return res.redirect('/oidc/login')
+          }
+          delete req.session.oidcStateRetry
           if (info.redir != null) {
             await UserController.doLogout(req)
             return res.redirect(info.redir)

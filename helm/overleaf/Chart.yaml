@@ -3,7 +3,7 @@ name: overleaf
 description: A Helm chart for Overleaf CE (ShareLaTeX) with OIDC support
 type: application
 version: 0.3.0
-appVersion: "v6.3.0-ext-v5.1-lirei.2"
+appVersion: "v6.3.0-ext-v5.1-lirei.3"
 
 dependencies:
   - name: mongodb
